@@ -95,9 +95,6 @@ bash ./scripts/start.sh
     <img alt="Telegram" src="https://img.shields.io/badge/telegram-online-blue.svg?style=for-the-badge&logo=t1elegram">
 </a>
 
-## Cadê a versão completa profissional?
-👉 Deseja obter a versão profissional com suporte, auto instalador, update automático, e todas as funções e um pão de queijo? Acesse: https://whitelabel.apibrasil.com.br
-
 ## Prints da interface
 <img src="./demo.gif" width="100%" />
 
@@ -112,6 +109,9 @@ https://myzap.apibrasil.com.br
 ```bash
 composer require jhowbhz/package-apigratis
 ```
+
+## Cadê a versão completa profissional?
+👉 Deseja obter a versão profissional com suporte, auto instalador, update automático, mais de 72 as funções e um pão de queijo? Acesse: https://whitelabel.apibrasil.com.br
 
 ## Atividades Recentes
 [![Time period](https://images.repography.com/28032565/billbarsch/myzap/recent-activity/e9752906386eaaf073221d572080d318_badge.svg)](https://repography.com)
