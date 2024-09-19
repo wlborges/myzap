@@ -11,7 +11,7 @@ module.exports = class Auth {
 		let data = await Sessions?.getClient(session)
 
 		if (!session) {
-			
+
 			res?.status(401)?.json({
 				"result": 401,
 				"messages": "Não autorizado, verifique se o nome da sessão esta correto"
@@ -23,22 +23,17 @@ module.exports = class Auth {
 				"result": 401,
 				"messages": "Não autorizado, verifique se o sessionkey esta correto"
 			})
-		
+
 		} else {
 
 			try {
-				
-				let img = Buffer?.from(data?.qrCode?.replace(/^data:image\/(png|jpeg|jpg);base64,/, ''), 'base64');
 
-				res?.writeHead(200, {
-					'Content-Type': 'image/png',
-					'Content-Length': img?.length
-				});
-
-				res?.end(img);
+				res.json({
+					img: data?.qrCode
+				})
 
 			} catch (error) {
-				
+
 				logger.error(`Error on getQrCode: ${error?.message}`)
 
 				res.status(500).json({

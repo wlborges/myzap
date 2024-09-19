@@ -3,9 +3,10 @@ const Sessions = require('../controllers/SessionsController')
 require('dotenv').config();
 
 const checkParams = async (req, res, next) => {
-  
-	let session = req?.body?.session
+
 	let sessionkey = req?.headers['sessionkey']
+	let session = sessionkey
+	req.body.session = session;
 	let apitoken = req?.headers['apitoken']
 
 	if (!sessionkey) {
@@ -18,7 +19,7 @@ const checkParams = async (req, res, next) => {
 
 	if (!session) {
 		return res.status(400).json({ error: 'session não informado no body.' });
-	} 
+	}
 
 	if (session) {
 		if ( session.match(/[^A-Za-z0-9\-_]/g) ) {
@@ -27,7 +28,7 @@ const checkParams = async (req, res, next) => {
 	}
 
 	let data = await Sessions?.getClient(session)
-	
+
 	if (req?.url == '/start' && req?.method === 'POST') {
 
 		if (!apitoken) {
@@ -37,9 +38,9 @@ const checkParams = async (req, res, next) => {
 		if (apitoken != process.env.TOKEN) {
 			return res.status(403).json({ error: "Unauthorized, please check the API TOKEN." });
 		}
-		
+
 	}else{
-	
+
 		if(!data) {
 			return res.status(404).json({
 				response: false,
