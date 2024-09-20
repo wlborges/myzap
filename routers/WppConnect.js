@@ -4,7 +4,7 @@ const Router = express.Router();
 const engine = require('../engines/WppConnect');
 const Sessions = require('../controllers/SessionsController.js');
 const Mensagens = require('../functions/WPPConnect/mensagens');
-const Business = require('../functions/WPPConnect/Business');
+const Business = require('../functions/WPPConnect/business');
 const Auth = require('../functions/WPPConnect/auth');
 
 const config = require('../config');
