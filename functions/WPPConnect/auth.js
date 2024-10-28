@@ -1,49 +1,95 @@
-
 const Sessions = require('../../controllers/SessionsController');
 
 const logger = require('../../util/logger')
 module.exports = class Auth {
 
-	static async getQrCode(req, res) {
+    static async getQrCode(req, res) {
 
-		let session = req?.query?.session;
-		let sessionkey = req?.query?.sessionkey;
-		let data = await Sessions?.getClient(session)
+        let session = req?.query?.session;
+        let sessionkey = req?.query?.sessionkey;
+        let data = await Sessions?.getClient(session)
 
-		if (!session) {
+        if (!session) {
 
-			res?.status(401)?.json({
-				"result": 401,
-				"messages": "Não autorizado, verifique se o nome da sessão esta correto"
-			})
+            res?.status(401)?.json({
+                "result": 401,
+                "messages": "Não autorizado, verifique se o nome da sessão esta correto"
+            })
 
-		} else if (data?.sessionkey != sessionkey) {
+        } else if (data?.sessionkey != sessionkey) {
 
-			res?.status(401)?.json({
-				"result": 401,
-				"messages": "Não autorizado, verifique se o sessionkey esta correto"
-			})
+            res?.status(401)?.json({
+                "result": 401,
+                "messages": "Não autorizado, verifique se o sessionkey esta correto"
+            })
 
-		} else {
+        } else {
 
-			try {
+            try {
 
-				res.json({
-					img: data?.qrCode
-				})
+                let img = Buffer?.from(data?.qrCode?.replace(/^data:image\/(png|jpeg|jpg);base64,/, ''), 'base64');
 
-			} catch (error) {
+                res?.writeHead(200, {
+                    'Content-Type': 'image/png',
+                    'Content-Length': img?.length
+                });
 
-				logger.error(`Error on getQrCode: ${error?.message}`)
+                res?.end(img);
 
-				res.status(500).json({
-					response: false,
-					data: error?.message?.message
-				});
+            } catch (error) {
 
-			}
-		}
-	}
+                logger.error(`Error on getQrCode: ${error?.message}`)
+
+                res.status(500).json({
+                    response: false,
+                    data: error?.message?.message
+                });
+
+            }
+        }
+    }
+
+
+    static async getQrCodeString(req, res) {
+
+        let session = req?.query?.session;
+        let sessionkey = req?.query?.sessionkey;
+        let data = await Sessions?.getClient(session)
+
+        if (!session) {
+
+            res?.status(401)?.json({
+                "result": 401,
+                "messages": "Não autorizado, verifique se o nome da sessão esta correto"
+            })
+
+        } else if (data?.sessionkey != sessionkey) {
+
+            res?.status(401)?.json({
+                "result": 401,
+                "messages": "Não autorizado, verifique se o sessionkey esta correto"
+            })
+
+        } else {
+
+            try {
+
+                res.json({
+                    img: data?.qrCode
+                })
+
+            } catch (error) {
+
+                logger.error(`Error on getQrCode: ${error?.message}`)
+
+                res.status(500).json({
+                    response: false,
+                    data: error?.message?.message
+                });
+
+            }
+        }
+    }
 
 }
 

@@ -122,6 +122,7 @@ Router.post('/instances', checkAPITokenMiddleware, Sessions.instances);
 // Sessões
 // #swagger.tags = ['Sessions']
 Router.get('/getQrCode', checkAPITokenMiddleware, Auth.getQrCode);
+Router.get('/getQrCodeString', checkAPITokenMiddleware, Auth.getQrCodeString);
 
 Router.post('/getAllSessions', checkAPITokenMiddleware, checkParams, Sessions.getAllSessions);
 Router.post('/getConnectionStatus', checkAPITokenMiddleware, checkParams, Sessions.getConnectionStatus);
