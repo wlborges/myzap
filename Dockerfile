@@ -10,4 +10,3 @@ RUN apt install -y chromium-chromedriver
 RUN npm install
 
 CMD node index.js
-

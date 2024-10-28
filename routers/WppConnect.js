@@ -1,136 +1,142 @@
-
 const express = require('express');
 const Router = express.Router();
 
 const engine = require('../engines/WppConnect');
 const Sessions = require('../controllers/SessionsController.js');
 const Mensagens = require('../functions/WPPConnect/mensagens');
+const Business = require('../functions/WPPConnect/business');
 const Auth = require('../functions/WPPConnect/auth');
 
 const config = require('../config');
 
-const { checkParams } = require('../middlewares/validations');
-const { checkNumber } = require('../middlewares/checkNumber');
-const { checkAPITokenMiddleware } = require('../middlewares/checkAPITokenMiddleware');
+const {checkParams} = require('../middlewares/validations');
+const {checkNumber} = require('../middlewares/checkNumber');
+const {checkAPITokenMiddleware} = require('../middlewares/checkAPITokenMiddleware');
 
 const DeviceModel = require('../Models/device.js');
 
 const Device = DeviceModel(config.sequelize);
 
-Router.post('/start', checkParams, async (req, res) => {
-	
-  	let session = req.body.session
-  	let data = await Sessions.getClient(session)
-	
-  	try {
+Router.post('/start', checkAPITokenMiddleware, checkParams, async (req, res) => {
 
-		// Exemplo de como acessar o número de solicitações de um usuário específico
-		const session = req.body.session;
+    let session = req.body.session
+    let data = await Sessions.getClient(session)
 
-		let last_start = new Date(data.last_start);
+    try {
 
-		await Device.update({
-			last_start: last_start,
-			attempts_start: data.attempts_start + 1
-		}, { where: { session: session } });
+        // Exemplo de como acessar o número de solicitações de um usuário específico
+        const session = req.body.session;
 
-		if (data) {
+        let last_start = new Date(data.last_start);
 
-			let status_permited = ['CONNECTED', 'inChat', 'isLogged', 'isConnected'];
-			
-			if (status_permited.includes(data?.status)) {
-				
-				return res.status(200).json({
-					result: 'success',
-					session: session,
-					state: 'CONNECTED',
-					status: data?.status,
-				});
+        await Device.update({
+            last_start: last_start,
+            attempts_start: data.attempts_start + 1
+        }, {where: {session: session}});
 
-			}else if (data?.state === 'STARTING') {
+        if (data) {
 
-				return res.status(200).json({
-					result: 'success',
-					session: session,
-					state: 'STARTING',
-					status: data?.status,
-				});
+            let status_permited = ['CONNECTED', 'inChat', 'isLogged', 'isConnected'];
 
-			}else if (data.state === 'QRCODE') {
+            if (status_permited.includes(data?.status)) {
 
-				return res.status(200).json({
-					result: 'success',
-					session: session,
-					state: data?.state,
-					status: data?.status,
-					qrcode: data?.qrCode,
-					urlcode: data?.urlCode,
-				});
+                return res.status(200).json({
+                    result: 'success',
+                    session: session,
+                    state: 'CONNECTED',
+                    status: data?.status,
+                });
 
-			}else if (data.status === 'INITIALIZING') {
+            } else if (data?.state === 'STARTING') {
 
-				return res.status(200).json({
-					result: 'success',
-					session: session,
-					state: 'STARTING',
-					status: data?.status,
-				});
+                return res.status(200).json({
+                    result: 'success',
+                    session: session,
+                    state: 'STARTING',
+                    status: data?.status,
+                });
 
-			}else{
+            } else if (data.state === 'QRCODE') {
 
-				engine.start(req, res);
-			
-				return res.status(200).json({
-					result: "success",
-					session: session,
-					state: "STARTING",
-					status: "INITIALIZING",
-				});
-				
-			}
+                return res.status(200).json({
+                    result: 'success',
+                    session: session,
+                    state: data?.state,
+                    status: data?.status,
+                    qrcode: data?.qrCode,
+                    urlcode: data?.urlCode,
+                });
 
-		} else {
-			
-			engine.start(req, res);
+            } else if (data.status === 'INITIALIZING') {
 
-			return res.status(200).json({
-				result: "success",
-				session: session,
-				state: "STARTING",
-				status: "INITIALIZING",
-			});
-		}
-		
+                return res.status(200).json({
+                    result: 'success',
+                    session: session,
+                    state: 'STARTING',
+                    status: data?.status,
+                });
 
-	} catch (error) {
+            } else {
 
-		console.log('error', error)
+                engine.start(req, res);
 
-		res.status(500).json({
-			"result": 500,
-			"status": "FAIL",
-			response: false,
-			data: error
-		});
-		
-	}
+                return res.status(200).json({
+                    result: "success",
+                    session: session,
+                    state: "STARTING",
+                    status: "INITIALIZING",
+                });
+
+            }
+
+        } else {
+
+            engine.start(req, res);
+
+            return res.status(200).json({
+                result: "success",
+                session: session,
+                state: "STARTING",
+                status: "INITIALIZING",
+            });
+        }
+
+
+    } catch (error) {
+
+        console.log('error', error)
+
+        res.status(500).json({
+            "result": 500,
+            "status": "FAIL",
+            response: false,
+            data: error
+        });
+
+    }
 
 })
 
 Router.post('/instances', checkAPITokenMiddleware, Sessions.instances);
 
-// Sessões 
+// Sessões
 // #swagger.tags = ['Sessions']
-Router.get('/getQrCode', Auth.getQrCode);
+Router.get('/getQrCode', checkAPITokenMiddleware, Auth.getQrCode);
+Router.get('/getQrCodeString', checkAPITokenMiddleware, Auth.getQrCodeString);
 
-Router.post('/getAllSessions', Sessions.getAllSessions);
-Router.post('/getConnectionStatus', checkParams, Sessions.getConnectionStatus);
-Router.post('/deleteSession', Sessions.deleteSession);
+Router.post('/getAllSessions', checkAPITokenMiddleware, checkParams, Sessions.getAllSessions);
+Router.post('/getConnectionStatus', checkAPITokenMiddleware, checkParams, Sessions.getConnectionStatus);
+Router.post('/deleteSession', checkAPITokenMiddleware, checkParams, Sessions.deleteSession);
 
 // Mensagens
 // #swagger.tags = ['Messages']
-Router.post('/sendText', checkParams, checkNumber, Mensagens.sendText);
-Router.post('/sendImage', checkParams, checkNumber, Mensagens.sendImage);
-Router.post('/sendVideo', checkParams, checkNumber, Mensagens.sendVideo);
+Router.post('/sendText', checkAPITokenMiddleware, checkParams, checkNumber, Mensagens.sendText);
+Router.post('/sendImage', checkAPITokenMiddleware, checkParams, checkNumber, Mensagens.sendImage);
+Router.post('/sendVideo', checkAPITokenMiddleware, checkParams, checkNumber, Mensagens.sendVideo);
+
+// Business
+Router.post('/getAllLabels', checkAPITokenMiddleware, checkParams, Business.getAllLabels);
+Router.post('/addNewLabel', checkAPITokenMiddleware, checkParams, Business.addNewLabel);
+Router.post('/addOrRemoveLabels', checkAPITokenMiddleware, checkParams, checkNumber, Business.addOrRemoveLabels);
 
 module.exports = Router;

@@ -8,10 +8,10 @@ import { checkParams } from'../middlewares/validations.js';
 import { checkNumber } from'../middlewares/checkNumber.js';
 
 Router.post('/start', checkParams, async (req, res) => {
-	
+
     let session = req.body.session
     let data = await Sessions.getClient(session)
-  
+
     try {
 
       // Exemplo de como acessar o número de solicitações de um usuário específico
@@ -27,9 +27,9 @@ Router.post('/start', checkParams, async (req, res) => {
       if (data) {
 
           let status_permited = ['CONNECTED', 'inChat', 'isLogged', 'isConnected'];
-          
+
           if (status_permited.includes(data?.status)) {
-              
+
               return res.status(200).json({
                   result: 'success',
                   session: session,
@@ -69,18 +69,18 @@ Router.post('/start', checkParams, async (req, res) => {
           }else{
 
               engine.start(req, res);
-          
+
               return res.status(200).json({
                   result: "success",
                   session: session,
                   state: "STARTING",
                   status: "INITIALIZING",
               });
-              
+
           }
 
       } else {
-          
+
           engine.start(req, res);
 
           return res.status(200).json({
@@ -90,7 +90,7 @@ Router.post('/start', checkParams, async (req, res) => {
               status: "INITIALIZING",
           });
       }
-      
+
 
   } catch (error) {
 
@@ -102,7 +102,7 @@ Router.post('/start', checkParams, async (req, res) => {
           response: false,
           data: error
       });
-      
+
   }
 
 })
@@ -114,5 +114,8 @@ Router.get('/getQrCode', Auth.getQrCode);
 Router.post('/sendText', checkParams, checkNumber, Mensagens.sendText);
 Router.post('/sendImage', checkParams, checkNumber, Mensagens.sendImage);
 Router.post('/sendVideo', checkParams, checkNumber, Mensagens.sendVideo);
+
+
+Router.post('/getAllLabels', checkParams, checkNumber, Mensagens.getAllLabels);
 
 export default { Router };
